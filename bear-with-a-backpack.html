@@ -33,9 +33,18 @@
             border: 1px solid #b026ff;
             border-radius: 6px;
             padding: 10px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             color: #ffffff;
             font-weight: bold;
+        }
+        .inventory-bar {
+            background-color: #0d0814;
+            border: 1px dashed #b026ff;
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 20px;
+            color: #e2aeff;
+            font-size: 15px;
         }
         p {
             font-size: 18px;
@@ -56,17 +65,14 @@
             width: 80%;
             max-width: 300px;
         }
-        .button-group {
-            margin-top: 20px;
-        }
         button {
             background-color: #b026ff;
             color: #ffffff;
             border: none;
-            padding: 12px 24px;
-            font-size: 16px;
+            padding: 12px 20px;
+            font-size: 15px;
             font-weight: bold;
-            margin: 8px;
+            margin: 6px;
             cursor: pointer;
             border-radius: 6px;
             transition: background 0.2s ease, box-shadow 0.2s ease;
@@ -97,13 +103,18 @@
     <div class="game-card">
         <h1>Bear with a Backpack</h1>
 
-        <!-- Live Stats Display -->
+        <!-- Dynamic Stats Display -->
         <div class="stats-bar">
             <span>❤️ Health: <span id="healthDisplay">3</span>/3</span>
             <span>🔋 Hunger: <span id="hungerDisplay">3</span>/5</span>
         </div>
+
+        <!-- Dynamic Backpack Display -->
+        <div class="inventory-bar">
+            🎒 <strong>Backpack:</strong> <span id="inventoryDisplay">Empty</span>
+        </div>
         
-        <p id="story-text">Hello and welcome to the forest! What is your name?</p>
+        <p id="story-text">Hello and welcome to the forest! You are new to these woods. What is your name?</p>
         
         <div id="interactive-area">
             <input type="text" id="userInput" placeholder="Enter your name...">
@@ -116,26 +127,39 @@
     <a href="index.html" class="home-btn">← Back to Arcade</a>
 
     <script>
-        // Game State Stats
+        // Player Stats & Inventory
         let health = 3;
         let hunger = 3;
         let playerName = "";
         let playerLocation = "";
+        let inventory = [];
 
-        function updateStats() {
+        function updateUI() {
             document.getElementById('healthDisplay').innerText = health;
             document.getElementById('hungerDisplay').innerText = hunger;
+            
+            const invDisplay = document.getElementById('inventoryDisplay');
+            if (inventory.length === 0) {
+                invDisplay.innerText = "Empty";
+            } else {
+                invDisplay.innerText = inventory.join(", ");
+            }
+        }
+
+        function checkGameOver() {
+            if (health <= 0) {
+                document.getElementById('story-text').innerText = "💀 You ran out of health and collapsed in the woods... GAME OVER!";
+                document.getElementById('interactive-area').innerHTML = `<button onclick="location.reload()">Try Again</button>`;
+                return true;
+            }
+            return false;
         }
 
         function submitName() {
             const input = document.getElementById('userInput').value;
             playerName = input.trim() !== "" ? input : "Bear";
             
-            const storyText = document.getElementById('story-text');
-            storyText.innerText = "Thats a nice name, but all I heard was GRRRRR.\n\nWhere are you from?";
-            
-            document.getElementById('userInput').value = "";
-            document.getElementById('userInput').placeholder = "Enter your location...";
+            document.getElementById('story-text').innerText = "That's a nice name, but all I heard was GRRRRR.\n\nWhere are you from?";
             
             const interactiveArea = document.getElementById('interactive-area');
             interactiveArea.innerHTML = `
@@ -146,38 +170,111 @@
         }
 
         function submitLocation() {
-            const storyText = document.getElementById('story-text');
-            storyText.innerText = "So what I'm getting is, your name is GRRRRR and you are from INCOMPREHENSIBLE GROWL.\n\nWhat do you want to do first?";
+            document.getElementById('story-text').innerText = "So what I'm getting is, your name is GRRRRR and you are from INCOMPREHENSIBLE GROWL.\n\nYou stand at a crossroads in the forest. Which way do you want to head?";
             
+            showMainChoices();
+        }
+
+        function showMainChoices() {
+            if (checkGameOver()) return;
+
             const interactiveArea = document.getElementById('interactive-area');
             interactiveArea.innerHTML = `
-                <button onclick="choosePath('left')">Go Left ⬅️</button>
-                <button onclick="choosePath('right')">Go Right ➡️</button>
-                <button onclick="choosePath('stay')">Stand Still 🛑</button>
+                <button onclick="goLeft()">Walk Left ⬅️</button>
+                <button onclick="goRight()">Walk Right ➡️</button>
             `;
         }
 
-        function choosePath(choice) {
-            const storyText = document.getElementById('story-text');
+        // --- LEFT PATH BRANCHES ---
+        function goLeft() {
+            document.getElementById('story-text').innerText = "You venture down the left path into dense trees. What do you search for?";
+            
             const interactiveArea = document.getElementById('interactive-area');
+            interactiveArea.innerHTML = `
+                <button onclick="inspectApple()">Look for an Apple 🍎</button>
+                <button onclick="encounterKnight()">Challenge the Knight ⚔️</button>
+                <button onclick="showMainChoices()">Back to Crossroads 🔙</button>
+            `;
+        }
 
-            if (choice === 'left') {
-                hunger = hunger + 1;
-                updateStats();
-                storyText.innerText = "You walk a few steps to the left and find an apple on the ground.\n\nCongratulations, GRRRRR! You eat the apple.\n🔋 Hunger is now: " + hunger + "/5";
-            } else if (choice === 'right') {
-                health = health - 1;
-                updateStats();
-                storyText.innerText = "You walk a few feet to the right and step in a bear trap!\n\n❤️ Health is now: " + health + "/3";
+        function inspectApple() {
+            const isGoodApple = Math.random() < 0.5;
+
+            if (isGoodApple) {
+                health = Math.min(3, health + 1);
+                hunger = Math.min(5, hunger + 1);
+                updateUI();
+                document.getElementById('story-text').innerText = "You find a juicy red apple! You eat it happily.\n\n❤️ Health +1 | 🔋 Hunger +1";
             } else {
-                health = health - 1;
-                updateStats();
-                storyText.innerText = "You stood still for too long and got bit by a mosquito.\n\n❤️ Health is now: " + health + "/3";
+                if (!inventory.includes("Worm")) {
+                    inventory.push("Worm");
+                }
+                updateUI();
+                document.getElementById('story-text').innerText = "You find an apple, but it's full of wriggling worms! You break off a worm and put it in your backpack.";
             }
 
-            interactiveArea.innerHTML = `<button onclick="location.reload()">Play Again</button>`;
+            const interactiveArea = document.getElementById('interactive-area');
+            interactiveArea.innerHTML = `<button onclick="goLeft()">Continue Left</button>`;
         }
-    </script>
 
-</body>
-</html>
+        function encounterKnight() {
+            document.getElementById('story-text').innerText = "A shiny knight steps out from behind an oak tree! 'Halt, Bear!' he yells, drawing his sword.";
+            
+            const interactiveArea = document.getElementById('interactive-area');
+            interactiveArea.innerHTML = `
+                <button onclick="fightKnight()">Fight the Knight 🐻</button>
+                <button onclick="goLeft()">Run Away 🏃</button>
+            `;
+        }
+
+        function fightKnight() {
+            const playerWins = Math.random() < 0.5;
+
+            if (playerWins) {
+                if (!inventory.includes("String")) {
+                    inventory.push("String");
+                }
+                updateUI();
+                document.getElementById('story-text').innerText = "ROAR! You let out a mighty growl and charge! The terrified knight runs away, dropping a piece of String on the ground. You put the String in your backpack.";
+            } else {
+                health -= 1;
+                updateUI();
+                if (checkGameOver()) return;
+                document.getElementById('story-text').innerText = "The knight strikes you with the flat of his blade! You take damage before backing off.\n\n❤️ Health -1";
+            }
+
+            const interactiveArea = document.getElementById('interactive-area');
+            interactiveArea.innerHTML = `<button onclick="goLeft()">Continue Left</button>`;
+        }
+
+        // --- RIGHT PATH BRANCHES ---
+        function goRight() {
+            document.getElementById('story-text').innerText = "You trek down the right path toward the river sound. What do you do?";
+            
+            const interactiveArea = document.getElementById('interactive-area');
+            interactiveArea.innerHTML = `
+                <button onclick="stepInTrap()">Explore the Bushes 🌿</button>
+                <button onclick="findStick()">Search for a Stick 🪵</button>
+                <button onclick="visitLake()">Head to the Lake 🌊</button>
+                <button onclick="showMainChoices()">Back to Crossroads 🔙</button>
+            `;
+        }
+
+        function stepInTrap() {
+            health -= 1;
+            updateUI();
+            if (checkGameOver()) return;
+
+            document.getElementById('story-text').innerText = "SNAP! You step directly into a hidden bear trap!\n\n❤️ Health -1";
+            
+            const interactiveArea = document.getElementById('interactive-area');
+            interactiveArea.innerHTML = `<button onclick="goRight()">Continue Right</button>`;
+        }
+
+        function findStick() {
+            if (!inventory.includes("Stick")) {
+                inventory.push("Stick");
+                updateUI();
+                document.getElementById('story-text').innerText = "You find a sturdy, flexible tree branch on the path and tuck the Stick into your backpack!";
+            } else {
+                document.getElementById('story-text').innerText = "

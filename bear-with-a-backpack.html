@@ -26,14 +26,38 @@
             margin-bottom: 20px;
             text-shadow: 0 0 10px rgba(209, 82, 255, 0.6);
         }
+        .stats-bar {
+            display: flex;
+            justify-content: space-around;
+            background-color: #0d0814;
+            border: 1px solid #b026ff;
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 20px;
+            color: #ffffff;
+            font-weight: bold;
+        }
         p {
             font-size: 18px;
             line-height: 1.5;
             min-height: 60px;
             color: #e2aeff;
         }
+        input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 6px;
+            border: 1px solid #b026ff;
+            background-color: #0d0814;
+            color: #ffffff;
+            margin-bottom: 15px;
+            outline: none;
+            text-align: center;
+            width: 80%;
+            max-width: 300px;
+        }
         .button-group {
-            margin-top: 30px;
+            margin-top: 20px;
         }
         button {
             background-color: #b026ff;
@@ -72,11 +96,19 @@
 
     <div class="game-card">
         <h1>Bear with a Backpack</h1>
-        <p id="story-text">You are a bear packing your backpack for a forest adventure. What do you pack first?</p>
+
+        <!-- Live Stats Display -->
+        <div class="stats-bar">
+            <span>❤️ Health: <span id="healthDisplay">3</span>/3</span>
+            <span>🔋 Hunger: <span id="hungerDisplay">3</span>/5</span>
+        </div>
         
-        <div id="choices" class="button-group">
-            <button onclick="makeChoice(1)">Pack Honey Jar 🍯</button>
-            <button onclick="makeChoice(2)">Pack Compass 🧭</button>
+        <p id="story-text">Hello and welcome to the forest! What is your name?</p>
+        
+        <div id="interactive-area">
+            <input type="text" id="userInput" placeholder="Enter your name...">
+            <br>
+            <button onclick="submitName()">Submit</button>
         </div>
     </div>
 
@@ -84,26 +116,66 @@
     <a href="index.html" class="home-btn">← Back to Arcade</a>
 
     <script>
-        function makeChoice(choice) {
-            const storyText = document.getElementById('story-text');
-            const choicesDiv = document.getElementById('choices');
+        // Game State Stats
+        let health = 3;
+        let hunger = 3;
+        let playerName = "";
+        let playerLocation = "";
 
-            if (choice === 1) {
-                storyText.innerText = "You packed the honey! A wild swarm of bees spots you in the forest.";
-                choicesDiv.innerHTML = `
-                    <button onclick="makeChoice(3)">Share the honey</button>
-                    <button onclick="makeChoice(4)">Run away!</button>
-                `;
-            } else if (choice === 2) {
-                storyText.innerText = "You used the compass to navigate straight to the mountain peak! You Win!";
-                choicesDiv.innerHTML = `<button onclick="location.reload()">Play Again</button>`;
-            } else if (choice === 3) {
-                storyText.innerText = "The bees become your friends and guide you to the giant honey cave! You Win!";
-                choicesDiv.innerHTML = `<button onclick="location.reload()">Play Again</button>`;
-            } else if (choice === 4) {
-                storyText.innerText = "You tripped while running! Game Over!";
-                choicesDiv.innerHTML = `<button onclick="location.reload()">Play Again</button>`;
+        function updateStats() {
+            document.getElementById('healthDisplay').innerText = health;
+            document.getElementById('hungerDisplay').innerText = hunger;
+        }
+
+        function submitName() {
+            const input = document.getElementById('userInput').value;
+            playerName = input.trim() !== "" ? input : "Bear";
+            
+            const storyText = document.getElementById('story-text');
+            storyText.innerText = "Thats a nice name, but all I heard was GRRRRR.\n\nWhere are you from?";
+            
+            document.getElementById('userInput').value = "";
+            document.getElementById('userInput').placeholder = "Enter your location...";
+            
+            const interactiveArea = document.getElementById('interactive-area');
+            interactiveArea.innerHTML = `
+                <input type="text" id="userInput" placeholder="Enter location...">
+                <br>
+                <button onclick="submitLocation()">Submit</button>
+            `;
+        }
+
+        function submitLocation() {
+            const storyText = document.getElementById('story-text');
+            storyText.innerText = "So what I'm getting is, your name is GRRRRR and you are from INCOMPREHENSIBLE GROWL.\n\nWhat do you want to do first?";
+            
+            const interactiveArea = document.getElementById('interactive-area');
+            interactiveArea.innerHTML = `
+                <button onclick="choosePath('left')">Go Left ⬅️</button>
+                <button onclick="choosePath('right')">Go Right ➡️</button>
+                <button onclick="choosePath('stay')">Stand Still 🛑</button>
+            `;
+        }
+
+        function choosePath(choice) {
+            const storyText = document.getElementById('story-text');
+            const interactiveArea = document.getElementById('interactive-area');
+
+            if (choice === 'left') {
+                hunger = hunger + 1;
+                updateStats();
+                storyText.innerText = "You walk a few steps to the left and find an apple on the ground.\n\nCongratulations, GRRRRR! You eat the apple.\n🔋 Hunger is now: " + hunger + "/5";
+            } else if (choice === 'right') {
+                health = health - 1;
+                updateStats();
+                storyText.innerText = "You walk a few feet to the right and step in a bear trap!\n\n❤️ Health is now: " + health + "/3";
+            } else {
+                health = health - 1;
+                updateStats();
+                storyText.innerText = "You stood still for too long and got bit by a mosquito.\n\n❤️ Health is now: " + health + "/3";
             }
+
+            interactiveArea.innerHTML = `<button onclick="location.reload()">Play Again</button>`;
         }
     </script>
 

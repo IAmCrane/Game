@@ -1,132 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bear with a Backpack</title>
-    <style>
-        body {
-            background-color: #0d0814;
-            color: #d152ff;
-            font-family: 'Courier New', Courier, monospace;
-            text-align: center;
-            padding: 50px 20px;
-        }
-        .game-card {
-            max-width: 600px;
-            margin: 0 auto;
-            border: 2px solid #b026ff;
-            padding: 30px;
-            border-radius: 12px;
-            background-color: #120224;
-            box-shadow: 0 0 20px rgba(176, 38, 255, 0.35);
-        }
-        h1 {
-            color: #ffffff;
-            margin-bottom: 20px;
-            text-shadow: 0 0 10px rgba(209, 82, 255, 0.6);
-        }
-        .stats-bar {
-            display: flex;
-            justify-content: space-around;
-            background-color: #0d0814;
-            border: 1px solid #b026ff;
-            border-radius: 6px;
-            padding: 10px;
-            margin-bottom: 15px;
-            color: #ffffff;
-            font-weight: bold;
-        }
-        .inventory-bar {
-            background-color: #0d0814;
-            border: 1px dashed #b026ff;
-            border-radius: 6px;
-            padding: 10px;
-            margin-bottom: 20px;
-            color: #e2aeff;
-            font-size: 15px;
-        }
-        p {
-            font-size: 18px;
-            line-height: 1.5;
-            min-height: 60px;
-            color: #e2aeff;
-        }
-        input[type="text"] {
-            padding: 10px;
-            font-size: 16px;
-            border-radius: 6px;
-            border: 1px solid #b026ff;
-            background-color: #0d0814;
-            color: #ffffff;
-            margin-bottom: 15px;
-            outline: none;
-            text-align: center;
-            width: 80%;
-            max-width: 300px;
-        }
-        button {
-            background-color: #b026ff;
-            color: #ffffff;
-            border: none;
-            padding: 12px 20px;
-            font-size: 15px;
-            font-weight: bold;
-            margin: 6px;
-            cursor: pointer;
-            border-radius: 6px;
-            transition: background 0.2s ease, box-shadow 0.2s ease;
-        }
-        button:hover {
-            background-color: #8c00e6;
-            box-shadow: 0 0 10px rgba(176, 38, 255, 0.6);
-        }
-        .home-btn {
-            display: inline-block;
-            margin-top: 25px;
-            color: #ffffff;
-            text-decoration: none;
-            font-size: 16px;
-            border: 1px solid #b026ff;
-            padding: 8px 18px;
-            border-radius: 6px;
-            transition: background 0.2s ease, color 0.2s ease;
-        }
-        .home-btn:hover {
-            background-color: #b026ff;
-            color: #ffffff;
-        }
-    </style>
-</head>
-<body>
-
-    <div class="game-card">
-        <h1>Bear with a Backpack</h1>
-
-        <!-- Dynamic Stats Display -->
-        <div class="stats-bar">
-            <span>❤️ Health: <span id="healthDisplay">3</span>/3</span>
-            <span>🔋 Hunger: <span id="hungerDisplay">3</span>/5</span>
-        </div>
-
-        <!-- Dynamic Backpack Display -->
-        <div class="inventory-bar">
-            🎒 <strong>Backpack:</strong> <span id="inventoryDisplay">Empty</span>
-        </div>
-        
-        <p id="story-text">Hello and welcome to the forest! You are new to these woods. What is your name?</p>
-        
-        <div id="interactive-area">
-            <input type="text" id="userInput" placeholder="Enter your name...">
-            <br>
-            <button onclick="submitName()">Submit</button>
-        </div>
-    </div>
-
-    <!-- Home Page Button -->
-    <a href="index.html" class="home-btn">← Back to Arcade</a>
-
-    <script>
+<script>
         // Player Stats & Inventory
         let health = 3;
         let hunger = 3;
@@ -156,10 +28,10 @@
         }
 
         function submitName() {
-            const input = document.getElementById('userInput').value;
-            playerName = input.trim() !== "" ? input : "Bear";
+            const inputField = document.getElementById('userInput');
+            playerName = inputField && inputField.value.trim() !== "" ? inputField.value.trim() : "Bear";
             
-            document.getElementById('story-text').innerText = "That's a nice name, but all I heard was GRRRRR.\n\nWhere are you from?";
+            document.getElementById('story-text').innerText = `Hello, ${playerName}! Where are you from?`;
             
             const interactiveArea = document.getElementById('interactive-area');
             interactiveArea.innerHTML = `
@@ -170,7 +42,10 @@
         }
 
         function submitLocation() {
-            document.getElementById('story-text').innerText = "So what I'm getting is, your name is GRRRRR and you are from INCOMPREHENSIBLE GROWL.\n\nYou stand at a crossroads in the forest. Which way do you want to head?";
+            const inputField = document.getElementById('userInput');
+            playerLocation = inputField && inputField.value.trim() !== "" ? inputField.value.trim() : "the forest";
+            
+            document.getElementById('story-text').innerText = `So your name is ${playerName} and you are from ${playerLocation}.\n\nYou stand at a crossroads in the forest. Which way do you want to head?`;
             
             showMainChoices();
         }
@@ -277,4 +152,39 @@
                 updateUI();
                 document.getElementById('story-text').innerText = "You find a sturdy, flexible tree branch on the path and tuck the Stick into your backpack!";
             } else {
-                document.getElementById('story-text').innerText = "
+                document.getElementById('story-text').innerText = "You look around, but you already have a great stick in your backpack.";
+            }
+
+            const interactiveArea = document.getElementById('interactive-area');
+            interactiveArea.innerHTML = `<button onclick="goRight()">Continue Right</button>`;
+        }
+
+        function visitLake() {
+            const hasWorm = inventory.includes("Worm");
+            const hasString = inventory.includes("String");
+            const hasStick = inventory.includes("Stick");
+
+            if (hasWorm && hasString && hasStick) {
+                inventory = inventory.filter(item => item !== "Worm" && item !== "String" && item !== "Stick");
+                inventory.push("Fishing Rod");
+                hunger = Math.min(5, hunger + 2);
+                updateUI();
+
+                document.getElementById('story-text').innerText = "You reach a beautiful, quiet lake. You open your backpack and combine your Stick, String, and Worm to craft a Fishing Rod!\n\nYou cast your line and catch a big fish! 🐟\n\n🔋 Hunger +2";
+            } else if (inventory.includes("Fishing Rod")) {
+                hunger = Math.min(5, hunger + 1);
+                updateUI();
+                document.getElementById('story-text').innerText = "You sit at the lake with your Fishing Rod and catch another fresh fish!\n\n🔋 Hunger +1";
+            } else {
+                let missing = [];
+                if (!hasStick) missing.push("Stick");
+                if (!hasString) missing.push("String");
+                if (!hasWorm) missing.push("Worm");
+
+                document.getElementById('story-text').innerText = "You arrive at a clear blue lake. It looks like a great spot to fish, but you still need: " + missing.join(", ") + " to make a fishing rod!";
+            }
+
+            const interactiveArea = document.getElementById('interactive-area');
+            interactiveArea.innerHTML = `<button onclick="goRight()">Continue Right</button>`;
+        }
+    </script>

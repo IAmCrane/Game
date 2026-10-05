@@ -6,7 +6,7 @@
     <title>Text Arcade - Home</title>
     <style>
         body {
-            background-color: #121212;
+            background-color: #0d0814;
             color: #ffffff;
             font-family: 'Courier New', Courier, monospace;
             text-align: center;
@@ -18,14 +18,14 @@
             margin: 0 auto;
         }
         h1 {
-            color: #00ff66;
+            color: #b026ff;
             font-size: 42px;
             margin-bottom: 10px;
-            text-shadow: 0 0 10px rgba(0, 255, 102, 0.5);
+            text-shadow: 0 0 12px rgba(176, 38, 255, 0.6);
         }
         p.subtitle {
             font-size: 18px;
-            color: #cccccc;
+            color: #e2aeff;
             margin-bottom: 40px;
         }
         .game-grid {
@@ -35,43 +35,45 @@
             align-items: center;
         }
         .game-card {
-            background-color: #1a1a1a;
-            border: 2px solid #00ff66;
+            background-color: #120224;
+            border: 2px solid #b026ff;
             border-radius: 12px;
             padding: 25px;
             width: 100%;
             max-width: 500px;
             box-sizing: border-box;
-            box-shadow: 0 4px 15px rgba(0, 255, 102, 0.15);
+            box-shadow: 0 0 20px rgba(176, 38, 255, 0.25);
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
         .game-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 6px 20px rgba(0, 255, 102, 0.3);
+            box-shadow: 0 0 25px rgba(176, 38, 255, 0.5);
         }
         .game-card h2 {
-            color: #00ff66;
+            color: #ffffff;
             margin-top: 0;
+            text-shadow: 0 0 8px rgba(209, 82, 255, 0.5);
         }
         .game-card p {
-            color: #dddddd;
+            color: #e2aeff;
             font-size: 15px;
             line-height: 1.4;
         }
         .play-btn {
             display: inline-block;
-            background-color: #00ff66;
-            color: #000000;
+            background-color: #b026ff;
+            color: #ffffff;
             text-decoration: none;
             padding: 12px 28px;
             font-weight: bold;
             font-size: 16px;
             border-radius: 6px;
             margin-top: 15px;
-            transition: background 0.2s ease;
+            transition: background 0.2s ease, box-shadow 0.2s ease;
         }
         .play-btn:hover {
-            background-color: #00cc52;
+            background-color: #8c00e6;
+            box-shadow: 0 0 12px rgba(176, 38, 255, 0.6);
         }
     </style>
 </head>
@@ -105,9 +107,9 @@
             </div>
 
             <!-- Future Game Slot -->
-            <div class="game-card" style="border-color: #555555; opacity: 0.6;">
-                <h2 style="color: #888888;">More Games Coming Soon...</h2>
-                <p>New text adventures and mini-games are currently in development!</p>
+            <div class="game-card" style="border-color: #5d2b7a; opacity: 0.6; box-shadow: none;">
+                <h2 style="color: #a370dc;">More Games Coming Soon...</h2>
+                <p style="color: #bfa1e6;">New text adventures and mini-games are currently in development!</p>
             </div>
 
         </div>

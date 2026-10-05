@@ -6,8 +6,8 @@
     <title>Rock Paper Scissors</title>
     <style>
         body {
-            background-color: #121212;
-            color: #00ff66;
+            background-color: #0d0814;
+            color: #d152ff;
             font-family: 'Courier New', Courier, monospace;
             text-align: center;
             padding: 50px 20px;
@@ -15,15 +15,24 @@
         .game-card {
             max-width: 500px;
             margin: 0 auto;
-            border: 2px solid #00ff66;
+            border: 2px solid #b026ff;
             padding: 30px;
             border-radius: 12px;
-            background-color: #000000;
-            box-shadow: 0 0 15px rgba(0, 255, 102, 0.2);
+            background-color: #120224;
+            box-shadow: 0 0 20px rgba(176, 38, 255, 0.35);
+        }
+        h1 {
+            color: #ffffff;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(209, 82, 255, 0.6);
+        }
+        p {
+            color: #e2aeff;
+            font-size: 16px;
         }
         button {
-            background-color: #00ff66;
-            color: #000;
+            background-color: #b026ff;
+            color: #ffffff;
             border: none;
             padding: 12px 20px;
             font-size: 16px;
@@ -31,18 +40,31 @@
             margin: 8px;
             cursor: pointer;
             border-radius: 6px;
+            transition: background 0.2s ease, box-shadow 0.2s ease;
         }
-        button:hover { background-color: #00cc52; }
+        button:hover {
+            background-color: #8c00e6;
+            box-shadow: 0 0 10px rgba(176, 38, 255, 0.6);
+        }
         .score-board {
             margin-top: 20px;
             font-size: 18px;
             color: #ffffff;
         }
-        .back-link {
+        .home-btn {
             display: inline-block;
             margin-top: 25px;
             color: #ffffff;
             text-decoration: none;
+            font-size: 16px;
+            border: 1px solid #b026ff;
+            padding: 8px 18px;
+            border-radius: 6px;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+        .home-btn:hover {
+            background-color: #b026ff;
+            color: #ffffff;
         }
     </style>
 </head>
@@ -58,15 +80,15 @@
             <button onclick="play('Scissors')">✌️ Scissors</button>
         </div>
 
-        <p id="result" style="font-size: 18px; margin-top: 20px;"></p>
+        <p id="result" style="font-size: 18px; margin-top: 20px; min-height: 24px;"></p>
 
         <div class="score-board">
             Score — You: <span id="playerScore">0</span> | Computer: <span id="compScore">0</span>
         </div>
     </div>
 
-    <br>
-    <a href="index.html" class="back-link">← Back to Arcade</a>
+    <!-- Home Page Button -->
+    <a href="index.html" class="home-btn">← Back to Arcade</a>
 
     <script>
         let playerScore = 0;

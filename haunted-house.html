@@ -3,50 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Text Adventure</title>
+    <title>The Haunted House</title>
     <style>
         body {
-            background-color: #1a1a1a;
-            color: #00ff66;
+            background-color: #0d0814;
+            color: #d152ff;
             font-family: 'Courier New', Courier, monospace;
             text-align: center;
             padding: 50px 20px;
         }
-        .game-container {
+        .game-card {
             max-width: 600px;
             margin: 0 auto;
-            border: 2px solid #00ff66;
-            padding: 20px;
-            border-radius: 10px;
-            background-color: #000;
+            border: 2px solid #b026ff;
+            padding: 30px;
+            border-radius: 12px;
+            background-color: #120224;
+            box-shadow: 0 0 20px rgba(176, 38, 255, 0.35);
+        }
+        h1 {
+            color: #ffffff;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(209, 82, 255, 0.6);
+        }
+        p {
+            font-size: 18px;
+            line-height: 1.5;
+            min-height: 60px;
+            color: #e2aeff;
+        }
+        .button-group {
+            margin-top: 30px;
         }
         button {
-            background-color: #00ff66;
-            color: #000;
+            background-color: #b026ff;
+            color: #ffffff;
             border: none;
-            padding: 10px 20px;
+            padding: 12px 24px;
             font-size: 16px;
             font-weight: bold;
-            margin: 10px 5px;
+            margin: 8px;
             cursor: pointer;
-            border-radius: 5px;
+            border-radius: 6px;
+            transition: background 0.2s ease, box-shadow 0.2s ease;
         }
         button:hover {
-            background-color: #00cc52;
+            background-color: #8c00e6;
+            box-shadow: 0 0 10px rgba(176, 38, 255, 0.6);
+        }
+        .home-btn {
+            display: inline-block;
+            margin-top: 25px;
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 16px;
+            border: 1px solid #b026ff;
+            padding: 8px 18px;
+            border-radius: 6px;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+        .home-btn:hover {
+            background-color: #b026ff;
+            color: #ffffff;
         }
     </style>
 </head>
 <body>
 
-    <div class="game-container">
+    <div class="game-card">
         <h1>The Haunted House</h1>
         <p id="story-text">You are standing in front of an old, abandoned house. The front door is slightly open.</p>
         
-        <div id="choices">
+        <div id="choices" class="button-group">
             <button onclick="makeChoice(1)">Enter the House</button>
             <button onclick="makeChoice(2)">Turn Back</button>
         </div>
     </div>
+
+    <!-- Home Page Button -->
+    <a href="index.html" class="home-btn">← Back to Arcade</a>
 
     <script>
         function makeChoice(choice) {
@@ -54,7 +89,7 @@
             const choicesDiv = document.getElementById('choices');
 
             if (choice === 1) {
-                storyText.innerText = "You step inside. The door slams shut behind you! You hear a noise upstairs.";
+                storyText.innerText = "You step inside. The door slams shut behind you! You hear a strange noise upstairs.";
                 choicesDiv.innerHTML = `
                     <button onclick="makeChoice(3)">Go Upstairs</button>
                     <button onclick="makeChoice(4)">Check the Basement</button>
@@ -63,10 +98,10 @@
                 storyText.innerText = "You decided it wasn't worth the risk and walked home safely. Game Over!";
                 choicesDiv.innerHTML = `<button onclick="location.reload()">Play Again</button>`;
             } else if (choice === 3) {
-                storyText.innerText = "You found a chest of gold on the top floor! You Win!";
+                storyText.innerText = "You found a chest full of treasure on the top floor! You Win!";
                 choicesDiv.innerHTML = `<button onclick="location.reload()">Play Again</button>`;
             } else if (choice === 4) {
-                storyText.innerText = "It's too dark to see! You tripped and fell. Game Over!";
+                storyText.innerText = "It's pitch black! You tripped down the stairs. Game Over!";
                 choicesDiv.innerHTML = `<button onclick="location.reload()">Play Again</button>`;
             }
         }

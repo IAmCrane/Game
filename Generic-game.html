@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Title Goes Here</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #2e3d29;
+            color: #f0f4f1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        #game-container {
+            background-color: #1e291b;
+            border: 2px solid #4a6b40;
+            border-radius: 12px;
+            padding: 24px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+
+        #stats-bar {
+            display: flex;
+            justify-content: space-around;
+            background-color: #2e3d29;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        #story-text {
+            min-height: 100px;
+            margin-bottom: 20px;
+            line-height: 1.5;
+            white-space: pre-line;
+        }
+
+        #interactive-area button {
+            background-color: #4a6b40;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            margin: 6px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        #interactive-area button:hover {
+            background-color: #638c56;
+        }
+
+        #interactive-area input {
+            padding: 8px 12px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div id="stats-bar">
+        <div>Stat 1: <span id="stat1Display">5</span>/5</div>
+        <div>Stat 2: <span id="stat2Display">5</span>/5</div>
+        <div>Inventory: <span id="inventoryDisplay">Empty</span></div>
+    </div>
+
+    <div id="story-text">text goes here</div>
+
+    <div id="interactive-area">
+        <button onclick="startGame()">text goes here</button>
+    </div>
+</div>
+
+<script>
+    // --- GAME STATE VARIABLES ---
+    let stat1 = 5;
+    let stat2 = 5;
+    let moveCount = 0;
+    let playerName = "";
+    let inventory = []; // Array of objects: { name: "Item Name", count: 1 }
+
+    // --- INVENTORY MANAGEMENT ---
+    function addItem(name) {
+        const item = inventory.find(i => i.name === name);
+        if (item) {
+            item.count += 1;
+        } else {
+            inventory.push({ name: name, count: 1 });
+        }
+    }
+
+    function removeItem(name) {
+        const itemIndex = inventory.findIndex(i => i.name === name);
+        if (itemIndex !== -1) {
+            inventory[itemIndex].count -= 1;
+            if (inventory[itemIndex].count <= 0) {
+                inventory.splice(itemIndex, 1);
+            }
+        }
+    }
+
+    function getItemCount(name) {
+        const item = inventory.find(i => i.name === name);
+        return item ? item.count : 0;
+    }
+
+    // --- UI UPDATES ---
+    function updateUI() {
+        document.getElementById('stat1Display').innerText = stat1;
+        document.getElementById('stat2Display').innerText = stat2;
+        const invDisplay = document.getElementById('inventoryDisplay');
+        
+        if (inventory.length === 0) {
+            invDisplay.innerHTML = "Empty";
+            return;
+        }
+
+        invDisplay.innerHTML = inventory.map(item => {
+            const label = item.count > 1 ? `${item.count}x ${item.name}` : item.name;
+            if (item.name === "Consumable Item") {
+                return `<button onclick="useItem('${item.name}')" style="padding:2px 6px; margin:2px; font-size:12px;">text goes here ${label}</button>`;
+            }
+            return `<span style="margin:2px;">${label}</span>`;
+        }).join(" | ");
+    }
+
+    // --- TURN / MOVEMENT TRACKER ---
+    function trackMovement() {
+        moveCount++;
+        let statusNotice = "";
+
+        if (moveCount % 3 === 0) {
+            if (stat2 > 0) {
+                stat2 -= 1;
+                statusNotice = "\n\ntext goes here";
+            } else {
+                stat1 -= 1;
+                statusNotice = "\n\ntext goes here";
+            }
+            updateUI();
+        }
+        return statusNotice;
+    }
+
+    // --- ITEM USAGE ---
+    function useItem(itemName) {
+        if (itemName === "Consumable Item") {
+            if (getItemCount("Consumable Item") > 0) {
+                removeItem("Consumable Item");
+                stat1 = Math.min(5, stat1 + 1);
+                stat2 = Math.min(5, stat2 + 1);
+                updateUI();
+                document.getElementById('story-text').innerText = "text goes here";
+            }
+        }
+    }
+
+    // --- GAME OVER CHECK ---
+    function checkGameOver() {
+        if (stat1 <= 0) {
+            document.getElementById('story-text').innerText = "text goes here";
+            document.getElementById('interactive-area').innerHTML = `
+                <button onclick="location.reload()">text goes here</button>
+            `;
+            return true;
+        }
+        return false;
+    }
+
+    // --- INTRO & PLAYER SETUP ---
+    function startGame() {
+        document.getElementById('story-text').innerText = "text goes here";
+        const interactiveArea = document.getElementById('interactive-area');
+        interactiveArea.innerHTML = `
+            <input type="text" id="userInput" placeholder="text goes here...">
+            <br><br>
+            <button onclick="submitName()">text goes here</button>
+        `;
+    }
+
+    function submitName() {
+        const inputField = document.getElementById('userInput');
+        playerName = inputField && inputField.value.trim() !== "" ? inputField.value.trim() : "Player";
+
+        document.getElementById('story-text').innerText = "text goes here";
+
+        showMainChoices();
+    }
+
+    // --- MAIN HUB / CHOICES ---
+    function showMainChoices() {
+        if (checkGameOver()) return;
+        const interactiveArea = document.getElementById('interactive-area');
+        interactiveArea.innerHTML = `
+            <button onclick="choiceOne()">text goes here</button>
+            <button onclick="choiceTwo()">text goes here</button>
+            <button onclick="choiceThree()">text goes here</button>
+        `;
+    }
+
+    // --- GAME SCENARIOS ---
+    function choiceOne() {
+        const statusMsg = trackMovement();
+        if (checkGameOver()) return;
+
+        document.getElementById('story-text').innerText = "text goes here" + statusMsg;
+        
+        const interactiveArea = document.getElementById('interactive-area');
+        interactiveArea.innerHTML = `
+            <button onclick="showMainChoices()">text goes here</button>
+        `;
+    }
+
+    function choiceTwo() {
+        const statusMsg = trackMovement();
+        if (checkGameOver()) return;
+
+        addItem("Consumable Item");
+        updateUI();
+
+        document.getElementById('story-text').innerText = "text goes here" + statusMsg;
+        
+        const interactiveArea = document.getElementById('interactive-area');
+        interactiveArea.innerHTML = `
+            <button onclick="showMainChoices()">text goes here</button>
+        `;
+    }
+
+    function choiceThree() {
+        const statusMsg = trackMovement();
+        if (checkGameOver()) return;
+
+        document.getElementById('story-text').innerText = "text goes here" + statusMsg;
+        
+        const interactiveArea = document.getElementById('interactive-area');
+        interactiveArea.innerHTML = `
+            <button onclick="showMainChoices()">text goes here</button>
+        `;
+    }
+</script>
+
+</body>
+</html>

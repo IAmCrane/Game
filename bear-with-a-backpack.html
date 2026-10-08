@@ -125,7 +125,9 @@
         const inputField = document.getElementById('userInput');
         playerName = inputField && inputField.value.trim() !== "" ? inputField.value.trim() : "Bear";
 
-        document.getElementById('story-text').innerText = `Hello, ${playerName}! Where are you from?`;
+        document.getElementById('story-text').innerText = 
+            `That's a nice name but all i heard was GRRRRR.\n\nWhere are you from?`;
+
         const interactiveArea = document.getElementById('interactive-area');
         interactiveArea.innerHTML = `
             <input type="text" id="userInput" placeholder="Enter location...">
@@ -139,7 +141,7 @@
         playerLocation = inputField && inputField.value.trim() !== "" ? inputField.value.trim() : "the forest";
 
         document.getElementById('story-text').innerText = 
-            `So your name is ${playerName} and you are from ${playerLocation}.\n\n` +
+            `So what I'm getting is, your name is GRRRRR, and you are from INCOMPREHENSIBLE GROWL.\n\n` +
             `You are in a forest clearing. There is a cave, a pond and two paths.\n\n` +
             `You can go down the left path, the right path, go in the cave, or go to the pond.`;
 
@@ -329,7 +331,7 @@
         `;
     }
 
-    // --- CAVE (Requires Lantern Fish) ---
+    // --- CAVE ---
     function enterCave() {
         const hasLanternFish = inventory.includes("Lantern Fish");
 

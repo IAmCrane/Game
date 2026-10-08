@@ -72,8 +72,8 @@
 
 <div id="game-container">
     <div id="stats-bar">
-        <div>❤️ Health: <span id="healthDisplay">3</span></div>
-        <div>🔋 Hunger: <span id="hungerDisplay">3</span></div>
+        <div>❤️ Health: <span id="healthDisplay">3</span>/5</div>
+        <div>🔋 Hunger: <span id="hungerDisplay">3</span>/5</div>
         <div>🎒 Backpack: <span id="inventoryDisplay">Empty</span></div>
     </div>
 
@@ -88,6 +88,7 @@
     // --- STATE VARIABLES ---
     let health = 3;
     let hunger = 3;
+    let moveCount = 0; // Tracks movements to trigger hunger drop
     let playerName = "";
     let playerLocation = "";
     let inventory = []; // Array of objects: { name: "Apple", count: 1 }
@@ -137,12 +138,30 @@
         }).join(" | ");
     }
 
+    // --- HUNGER STEP COUNTER ---
+    function trackMovement() {
+        moveCount++;
+        let hungerNotice = "";
+
+        if (moveCount % 3 === 0) {
+            if (hunger > 0) {
+                hunger -= 1;
+                hungerNotice = "\n\n⚠️ You feel hungry from traveling... (Hunger -1)";
+            } else {
+                health -= 1;
+                hungerNotice = "\n\n💀 You are starving! (Health -1)";
+            }
+            updateUI();
+        }
+        return hungerNotice;
+    }
+
     // --- CONSUMABLE ITEM USE ---
     function useItem(itemName) {
         if (itemName === "Apple") {
             if (getItemCount("Apple") > 0) {
                 removeItem("Apple");
-                health = Math.min(3, health + 1);
+                health = Math.min(5, health + 1);
                 hunger = Math.min(5, hunger + 1);
                 updateUI();
                 document.getElementById('story-text').innerText = 
@@ -151,19 +170,20 @@
         } else if (itemName === "Cod Fish") {
             if (getItemCount("Cod Fish") > 0) {
                 removeItem("Cod Fish");
-                health = Math.min(3, health + 1);
+                health = Math.min(5, health + 2);
                 hunger = Math.min(5, hunger + 2);
                 updateUI();
                 document.getElementById('story-text').innerText = 
-                    "🐟 You ate a cooked Cod Fish!\n\n❤️ Health +1 | 🔋 Hunger +2";
+                    "🐟 You ate a cooked Cod Fish!\n\n❤️ Health +2 | 🔋 Hunger +2";
             }
         } else if (itemName === "Berry") {
             if (getItemCount("Berry") > 0) {
                 removeItem("Berry");
+                health = Math.min(5, health + 1);
                 hunger = Math.min(5, hunger + 1);
                 updateUI();
                 document.getElementById('story-text').innerText = 
-                    "🫐 You snacked on a Berry from your backpack!\n\n🔋 Hunger +1";
+                    "🫐 You snacked on a Berry from your backpack!\n\n❤️ Health +1 | 🔋 Hunger +1";
             }
         }
     }
@@ -230,15 +250,18 @@
 
     // --- LEFT PATH ---
     function goLeft() {
+        const hungerMsg = trackMovement();
+        if (checkGameOver()) return;
+
         const roll = Math.random();
 
         if (roll < 0.35) {
-            inspectApple();
+            inspectApple(hungerMsg);
         } else if (roll < 0.70) {
-            encounterKnight();
+            encounterKnight(hungerMsg);
         } else {
             document.getElementById('story-text').innerText = 
-                "You walk along the left path. The forest is peaceful and quiet... nothing happens.";
+                "You walk along the left path. The forest is peaceful and quiet... nothing happens." + hungerMsg;
             
             const interactiveArea = document.getElementById('interactive-area');
             interactiveArea.innerHTML = `
@@ -247,19 +270,19 @@
         }
     }
 
-    function inspectApple() {
+    function inspectApple(hungerMsg = "") {
         const isGoodApple = Math.random() < 0.5;
 
         if (isGoodApple) {
             addItem("Apple");
             updateUI();
             document.getElementById('story-text').innerText = 
-                "You find a fresh, juicy red Apple! You put it in your backpack for later.";
+                "You find a fresh, juicy red Apple! You put it in your backpack for later." + hungerMsg;
         } else {
             addItem("Worm");
             updateUI();
             document.getElementById('story-text').innerText = 
-                "You find an apple, but it's full of wriggling worms! You break off a Worm and put it in your backpack.";
+                "You find an apple, but it's full of wriggling worms! You break off a Worm and put it in your backpack." + hungerMsg;
         }
 
         const interactiveArea = document.getElementById('interactive-area');
@@ -268,9 +291,9 @@
         `;
     }
 
-    function encounterKnight() {
+    function encounterKnight(hungerMsg = "") {
         document.getElementById('story-text').innerText = 
-            "A shiny knight steps out from behind an oak tree! 'Halt, Bear!' he yells, drawing his sword.";
+            "A shiny knight steps out from behind an oak tree! 'Halt, Bear!' he yells, drawing his sword." + hungerMsg;
         
         const interactiveArea = document.getElementById('interactive-area');
         interactiveArea.innerHTML = `
@@ -323,17 +346,20 @@
 
     // --- RIGHT PATH ---
     function goRight() {
+        const hungerMsg = trackMovement();
+        if (checkGameOver()) return;
+
         const roll = Math.random();
 
         if (roll < 0.30) {
-            stepInTrap();
+            stepInTrap(hungerMsg);
         } else if (roll < 0.60) {
-            findStick();
+            findStick(hungerMsg);
         } else if (roll < 0.85) {
-            findBerryBush();
+            findBerryBush(hungerMsg);
         } else {
             document.getElementById('story-text').innerText = 
-                "You stroll down the right path. The wind rustles through the leaves, but the trail is quiet.";
+                "You stroll down the right path. The wind rustles through the leaves, but the trail is quiet." + hungerMsg;
             
             const interactiveArea = document.getElementById('interactive-area');
             interactiveArea.innerHTML = `
@@ -343,13 +369,13 @@
         }
     }
 
-    function stepInTrap() {
+    function stepInTrap(hungerMsg = "") {
         health -= 1;
         updateUI();
         if (checkGameOver()) return;
 
         document.getElementById('story-text').innerText = 
-            "SNAP! You step directly into a hidden bear trap and take damage!\n\n❤️ Health -1";
+            "SNAP! You step directly into a hidden bear trap and take damage!\n\n❤️ Health -1" + hungerMsg;
         
         const interactiveArea = document.getElementById('interactive-area');
         interactiveArea.innerHTML = `
@@ -358,11 +384,11 @@
         `;
     }
 
-    function findStick() {
+    function findStick(hungerMsg = "") {
         addItem("Stick");
         updateUI();
         document.getElementById('story-text').innerText = 
-            "You spot a long, sturdy branch lying near the path. You tuck the Stick into your backpack!";
+            "You spot a long, sturdy branch lying near the path. You tuck the Stick into your backpack!" + hungerMsg;
 
         const interactiveArea = document.getElementById('interactive-area');
         interactiveArea.innerHTML = `
@@ -371,12 +397,13 @@
         `;
     }
 
-    function findBerryBush() {
+    function findBerryBush(hungerMsg = "") {
         addItem("Berry");
         hunger = Math.min(5, hunger + 1);
+        health = Math.min(5, health + 1);
         updateUI();
         document.getElementById('story-text').innerText = 
-            "You find a lush berry bush filled with sweet berries! You eat one and put another in your backpack.\n\n🔋 Hunger +1";
+            "You find a lush berry bush filled with sweet berries! You eat one and put another in your backpack.\n\n❤️ Health +1 | 🔋 Hunger +1" + hungerMsg;
 
         const interactiveArea = document.getElementById('interactive-area');
         interactiveArea.innerHTML = `
@@ -387,6 +414,9 @@
 
     // --- CAVE ---
     function enterCave() {
+        const hungerMsg = trackMovement();
+        if (checkGameOver()) return;
+
         const hasLanternFish = getItemCount("Lantern Fish") > 0;
 
         if (hasLanternFish) {
@@ -401,7 +431,7 @@
             `;
         } else {
             document.getElementById('story-text').innerText = 
-                "You step into the cave, but it is way too dark to see anything! You decide to leave and head back to the clearing.";
+                "You step into the cave, but it is way too dark to see anything! You decide to leave and head back to the clearing." + hungerMsg;
             
             const interactiveArea = document.getElementById('interactive-area');
             interactiveArea.innerHTML = `
@@ -412,6 +442,9 @@
 
     // --- POND / FISHING LOGIC ---
     function visitLake() {
+        const hungerMsg = trackMovement();
+        if (checkGameOver()) return;
+
         const hasWorm = getItemCount("Worm") > 0;
         const hasString = getItemCount("String") > 0;
         const hasStick = getItemCount("Stick") > 0;
@@ -424,12 +457,13 @@
             removeItem("Berry");
             addItem("Lantern Fish");
             hunger = Math.min(5, hunger + 3);
+            health = Math.min(5, health + 2);
             updateUI();
 
             document.getElementById('story-text').innerText = 
                 "You reach the pond with your Stick, String, Worm, and a Berry!\n\n" +
                 "You assemble a makeshift rod, bait the hook with the berry and worm, and cast out...\n\n" +
-                "🎣 SPLASH! You caught a rare Lantern Fish! It glows brightly in the dark! 🐟✨";
+                "🎣 SPLASH! You caught a rare Lantern Fish! It glows brightly in the dark! 🐟✨" + hungerMsg;
 
         } else if (hasWorm && hasString && hasStick) {
             removeItem("Worm");
@@ -437,16 +471,17 @@
             removeItem("Stick");
             addItem("Cod Fish");
             hunger = Math.min(5, hunger + 2);
+            health = Math.min(5, health + 2);
             updateUI();
 
             document.getElementById('story-text').innerText = 
                 "You reach the pond with your Stick, String, and Worm.\n\n" +
                 "You construct a fishing pole and cast your line...\n\n" +
-                "🎣 You caught a fresh Cod Fish! 🐟";
+                "🎣 You caught a fresh Cod Fish! 🐟" + hungerMsg;
 
         } else if (getItemCount("Lantern Fish") > 0 || getItemCount("Cod Fish") > 0) {
             document.getElementById('story-text').innerText = 
-                "You stand by the quiet pond, but you've already fished here.";
+                "You stand by the quiet pond, but you've already fished here." + hungerMsg;
         } else {
             let missing = [];
             if (!hasStick) missing.push("Stick");
@@ -455,7 +490,7 @@
 
             document.getElementById('story-text').innerText = 
                 "You arrive at the quiet pond. There is nothing to do right now...\n\n" +
-                "You still need: " + missing.join(", ") + " to fish!";
+                "You still need: " + missing.join(", ") + " to fish!" + hungerMsg;
         }
 
         const interactiveArea = document.getElementById('interactive-area');

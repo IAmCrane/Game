@@ -1,190 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bear with a Backpack</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #2e3d29;
+            color: #f0f4f1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        #game-container {
+            background-color: #1e291b;
+            border: 2px solid #4a6b40;
+            border-radius: 12px;
+            padding: 24px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+
+        #stats-bar {
+            display: flex;
+            justify-content: space-around;
+            background-color: #2e3d29;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        #story-text {
+            min-height: 100px;
+            margin-bottom: 20px;
+            line-height: 1.5;
+            white-space: pre-line;
+        }
+
+        #interactive-area button {
+            background-color: #4a6b40;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            margin: 6px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        #interactive-area button:hover {
+            background-color: #638c56;
+        }
+
+        #interactive-area input {
+            padding: 8px 12px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div id="stats-bar">
+        <div>❤️ Health: <span id="healthDisplay">3</span></div>
+        <div>🔋 Hunger: <span id="hungerDisplay">3</span></div>
+        <div>🎒 Backpack: <span id="inventoryDisplay">Empty</span></div>
+    </div>
+
+    <div id="story-text">You are a bear with a backpack. Welcome to the forest!</div>
+
+    <div id="interactive-area">
+        <button onclick="askName()">Begin Adventure 🐻</button>
+    </div>
+</div>
+
 <script>
-        // Player Stats & Inventory
-        let health = 3;
-        let hunger = 3;
-        let playerName = "";
-        let playerLocation = "";
-        let inventory = [];
+    // --- STATE VARIABLES ---
+    let health = 3;
+    let hunger = 3;
+    let playerName = "";
+    let playerLocation = "";
+    let inventory = [];
 
-        function updateUI() {
-            document.getElementById('healthDisplay').innerText = health;
-            document.getElementById('hungerDisplay').innerText = hunger;
+    function updateUI() {
+        document.getElementById('healthDisplay').innerText = health;
+        document.getElementById('hungerDisplay').innerText = hunger;
+        const invDisplay = document.getElementById('inventoryDisplay');
+        invDisplay.innerText = inventory.length === 0 ? "Empty" : inventory.join(", ");
+    }
+
+    function checkGameOver() {
+        if (health <= 0) {
+            document.getElementById('story-text').innerText = "💀 You ran out of health and collapsed in the woods... GAME OVER!";
+            document.getElementById('interactive-area').innerHTML = `
+                <button onclick="location.reload()">Try Again 🔄</button>
+            `;
+            return true;
+        }
+        return false;
+    }
+
+    // --- INTRO FLOW ---
+    function askName() {
+        document.getElementById('story-text').innerText = "What is your name, bear?";
+        const interactiveArea = document.getElementById('interactive-area');
+        interactiveArea.innerHTML = `
+            <input type="text" id="userInput" placeholder="Enter your name...">
+            <br><br>
+            <button onclick="submitName()">Submit</button>
+        `;
+    }
+
+    function submitName() {
+        const inputField = document.getElementById('userInput');
+        playerName = inputField && inputField.value.trim() !== "" ? inputField.value.trim() : "Bear";
+
+        document.getElementById('story-text').innerText = `Hello, ${playerName}! Where are you from?`;
+        const interactiveArea = document.getElementById('interactive-area');
+        interactiveArea.innerHTML = `
+            <input type="text" id="userInput" placeholder="Enter location...">
+            <br><br>
+            <button onclick="submitLocation()">Submit</button>
+        `;
+    }
+
+    function submitLocation() {
+        const inputField = document.getElementById('userInput');
+        playerLocation = inputField && inputField.value.trim() !== "" ? inputField.value.trim() : "the forest";
+
+        document.getElementById('story-text').innerText = 
+            `So your name is ${playerName} and you are from ${playerLocation}.\n\n` +
+            `You are in a forest clearing. There is a cave, a pond and two paths.\n\n` +
+            `You can go down the left path, the right path, go in the cave, or go to the pond.`;
+
+        showMainChoices();
+    }
+
+    function showMainChoices() {
+        if (checkGameOver()) return;
+        const interactiveArea = document.getElementById('interactive-area');
+        interactiveArea.innerHTML = `
+            <button onclick="goLeft()">Left Path ⬅️</button>
+            <button onclick="goRight()">Right Path ➡️</button>
+            <button onclick="enterCave()">Go in Cave 🦇</button>
+            <button onclick="visitLake()">Go to Pond 🌊</button>
+        `;
+    }
+
+    // --- LEFT PATH ---
+    function goLeft() {
+        const roll = Math.random();
+
+        if (roll < 0.35) {
+            inspectApple();
+        } else if (roll < 0.70) {
+            encounterKnight();
+        } else {
+            document.getElementById('story-text').innerText = 
+                "You walk along the left path. The forest is peaceful and quiet... nothing happens.";
             
-            const invDisplay = document.getElementById('inventoryDisplay');
-            if (inventory.length === 0) {
-                invDisplay.innerText = "Empty";
-            } else {
-                invDisplay.innerText = inventory.join(", ");
+            const interactiveArea = document.getElementById('interactive-area');
+            interactiveArea.innerHTML = `
+                <button onclick="showMainChoices()">Back to Clearing 🔙</button>
+            `;
+        }
+    }
+
+    function inspectApple() {
+        const isGoodApple = Math.random() < 0.5;
+
+        if (isGoodApple) {
+            health = Math.min(3, health + 1);
+            hunger = Math.min(5, hunger + 1);
+            updateUI();
+            document.getElementById('story-text').innerText = 
+                "You find a fresh, juicy red apple! You eat it happily.\n\n❤️ Health +1 | 🔋 Hunger +1";
+        } else {
+            if (!inventory.includes("Worm")) {
+                inventory.push("Worm");
             }
+            updateUI();
+            document.getElementById('story-text').innerText = 
+                "You find an apple, but it's full of wriggling worms! You break off a worm and put it in your backpack.";
         }
 
-        function checkGameOver() {
-            if (health <= 0) {
-                document.getElementById('story-text').innerText = "💀 You ran out of health and collapsed in the woods... GAME OVER!";
-                document.getElementById('interactive-area').innerHTML = `<button onclick="location.reload()">Try Again</button>`;
-                return true;
+        const interactiveArea = document.getElementById('interactive-area');
+        interactiveArea.innerHTML = `
+            <button onclick="showMainChoices()">Back to Clearing 🔙</button>
+        `;
+    }
+
+    function encounterKnight() {
+        document.getElementById('story-text').innerText = 
+            "A shiny knight steps out from behind an oak tree! 'Halt, Bear!' he yells, drawing his sword.";
+        
+        const interactiveArea = document.getElementById('interactive-area');
+        interactiveArea.innerHTML = `
+            <button onclick="fightKnight()">Fight the Knight ⚔️</button>
+            <button onclick="runFromKnight()">Run Away 🏃</button>
+        `;
+    }
+
+    function fightKnight() {
+        const playerWins = Math.random() < 0.5;
+
+        if (playerWins) {
+            if (!inventory.includes("String")) {
+                inventory.push("String");
             }
-            return false;
-        }
-
-        function submitName() {
-            const inputField = document.getElementById('userInput');
-            playerName = inputField && inputField.value.trim() !== "" ? inputField.value.trim() : "Bear";
-            
-            document.getElementById('story-text').innerText = `Hello, ${playerName}! Where are you from?`;
-            
-            const interactiveArea = document.getElementById('interactive-area');
-            interactiveArea.innerHTML = `
-                <input type="text" id="userInput" placeholder="Enter location...">
-                <br>
-                <button onclick="submitLocation()">Submit</button>
-            `;
-        }
-
-        function submitLocation() {
-            const inputField = document.getElementById('userInput');
-            playerLocation = inputField && inputField.value.trim() !== "" ? inputField.value.trim() : "the forest";
-            
-            document.getElementById('story-text').innerText = `So your name is ${playerName} and you are from ${playerLocation}.\n\nYou stand at a crossroads in the forest. Which way do you want to head?`;
-            
-            showMainChoices();
-        }
-
-        function showMainChoices() {
-            if (checkGameOver()) return;
-
-            const interactiveArea = document.getElementById('interactive-area');
-            interactiveArea.innerHTML = `
-                <button onclick="goLeft()">Walk Left ⬅️</button>
-                <button onclick="goRight()">Walk Right ➡️</button>
-            `;
-        }
-
-        // --- LEFT PATH BRANCHES ---
-        function goLeft() {
-            document.getElementById('story-text').innerText = "You venture down the left path into dense trees. What do you search for?";
-            
-            const interactiveArea = document.getElementById('interactive-area');
-            interactiveArea.innerHTML = `
-                <button onclick="inspectApple()">Look for an Apple 🍎</button>
-                <button onclick="encounterKnight()">Challenge the Knight ⚔️</button>
-                <button onclick="showMainChoices()">Back to Crossroads 🔙</button>
-            `;
-        }
-
-        function inspectApple() {
-            const isGoodApple = Math.random() < 0.5;
-
-            if (isGoodApple) {
-                health = Math.min(3, health + 1);
-                hunger = Math.min(5, hunger + 1);
-                updateUI();
-                document.getElementById('story-text').innerText = "You find a juicy red apple! You eat it happily.\n\n❤️ Health +1 | 🔋 Hunger +1";
-            } else {
-                if (!inventory.includes("Worm")) {
-                    inventory.push("Worm");
-                }
-                updateUI();
-                document.getElementById('story-text').innerText = "You find an apple, but it's full of wriggling worms! You break off a worm and put it in your backpack.";
-            }
-
-            const interactiveArea = document.getElementById('interactive-area');
-            interactiveArea.innerHTML = `<button onclick="goLeft()">Continue Left</button>`;
-        }
-
-        function encounterKnight() {
-            document.getElementById('story-text').innerText = "A shiny knight steps out from behind an oak tree! 'Halt, Bear!' he yells, drawing his sword.";
-            
-            const interactiveArea = document.getElementById('interactive-area');
-            interactiveArea.innerHTML = `
-                <button onclick="fightKnight()">Fight the Knight 🐻</button>
-                <button onclick="goLeft()">Run Away 🏃</button>
-            `;
-        }
-
-        function fightKnight() {
-            const playerWins = Math.random() < 0.5;
-
-            if (playerWins) {
-                if (!inventory.includes("String")) {
-                    inventory.push("String");
-                }
-                updateUI();
-                document.getElementById('story-text').innerText = "ROAR! You let out a mighty growl and charge! The terrified knight runs away, dropping a piece of String on the ground. You put the String in your backpack.";
-            } else {
-                health -= 1;
-                updateUI();
-                if (checkGameOver()) return;
-                document.getElementById('story-text').innerText = "The knight strikes you with the flat of his blade! You take damage before backing off.\n\n❤️ Health -1";
-            }
-
-            const interactiveArea = document.getElementById('interactive-area');
-            interactiveArea.innerHTML = `<button onclick="goLeft()">Continue Left</button>`;
-        }
-
-        // --- RIGHT PATH BRANCHES ---
-        function goRight() {
-            document.getElementById('story-text').innerText = "You trek down the right path toward the river sound. What do you do?";
-            
-            const interactiveArea = document.getElementById('interactive-area');
-            interactiveArea.innerHTML = `
-                <button onclick="stepInTrap()">Explore the Bushes 🌿</button>
-                <button onclick="findStick()">Search for a Stick 🪵</button>
-                <button onclick="visitLake()">Head to the Lake 🌊</button>
-                <button onclick="showMainChoices()">Back to Crossroads 🔙</button>
-            `;
-        }
-
-        function stepInTrap() {
+            updateUI();
+            document.getElementById('story-text').innerText = 
+                "ROAR! You let out a mighty growl and defeat the knight! He flees, dropping a piece of String on the ground. You put it in your backpack.";
+        } else {
             health -= 1;
             updateUI();
             if (checkGameOver()) return;
+            document.getElementById('story-text').innerText = 
+                "You try to fight, but the knight strikes you with his sword! You lose a heart.\n\n❤️ Health -1";
+        }
 
-            document.getElementById('story-text').innerText = "SNAP! You step directly into a hidden bear trap!\n\n❤️ Health -1";
+        const interactiveArea = document.getElementById('interactive-area');
+        interactiveArea.innerHTML = `
+            <button onclick="showMainChoices()">Back to Clearing 🔙</button>
+        `;
+    }
+
+    function runFromKnight() {
+        const gotAway = Math.random() < 0.5;
+
+        if (gotAway) {
+            document.getElementById('story-text').innerText = 
+                "You turn around and sprint into the brush. You manage to escape safely!";
+        } else {
+            health -= 1;
+            updateUI();
+            if (checkGameOver()) return;
+            document.getElementById('story-text').innerText = 
+                "You try to run away, but you trip over a root and the knight strikes you before you escape! You lose a heart.\n\n❤️ Health -1";
+        }
+
+        const interactiveArea = document.getElementById('interactive-area');
+        interactiveArea.innerHTML = `
+            <button onclick="showMainChoices()">Back to Clearing 🔙</button>
+        `;
+    }
+
+    // --- RIGHT PATH ---
+    function goRight() {
+        const roll = Math.random();
+
+        if (roll < 0.30) {
+            stepInTrap();
+        } else if (roll < 0.60) {
+            findStick();
+        } else if (roll < 0.85) {
+            findBerryBush();
+        } else {
+            document.getElementById('story-text').innerText = 
+                "You stroll down the right path. The wind rustles through the leaves, but the trail is quiet.";
             
             const interactiveArea = document.getElementById('interactive-area');
-            interactiveArea.innerHTML = `<button onclick="goRight()">Continue Right</button>`;
+            interactiveArea.innerHTML = `
+                <button onclick="visitLake()">Go to Pond 🌊</button>
+                <button onclick="showMainChoices()">Back to Clearing 🔙</button>
+            `;
+        }
+    }
+
+    function stepInTrap() {
+        health -= 1;
+        updateUI();
+        if (checkGameOver()) return;
+
+        document.getElementById('story-text').innerText = 
+            "SNAP! You step directly into a hidden bear trap and take damage!\n\n❤️ Health -1";
+        
+        const interactiveArea = document.getElementById('interactive-area');
+        interactiveArea.innerHTML = `
+            <button onclick="visitLake()">Go to Pond 🌊</button>
+            <button onclick="showMainChoices()">Back to Clearing 🔙</button>
+        `;
+    }
+
+    function findStick() {
+        if (!inventory.includes("Stick")) {
+            inventory.push("Stick");
+            updateUI();
+            document.getElementById('story-text').innerText = 
+                "You spot a long, sturdy branch lying near the path. You tuck the Stick into your backpack!";
+        } else {
+            document.getElementById('story-text').innerText = 
+                "You see some fallen branches, but you already have a sturdy stick in your backpack.";
         }
 
-        function findStick() {
-            if (!inventory.includes("Stick")) {
-                inventory.push("Stick");
-                updateUI();
-                document.getElementById('story-text').innerText = "You find a sturdy, flexible tree branch on the path and tuck the Stick into your backpack!";
-            } else {
-                document.getElementById('story-text').innerText = "You look around, but you already have a great stick in your backpack.";
-            }
+        const interactiveArea = document.getElementById('interactive-area');
+        interactiveArea.innerHTML = `
+            <button onclick="visitLake()">Go to Pond 🌊</button>
+            <button onclick="showMainChoices()">Back to Clearing 🔙</button>
+        `;
+    }
 
+    function findBerryBush() {
+        if (!inventory.includes("Berry")) {
+            inventory.push("Berry");
+            hunger = Math.min(5, hunger + 1);
+            updateUI();
+            document.getElementById('story-text').innerText = 
+                "You find a lush berry bush filled with sweet berries! You eat one and put another in your backpack.\n\n🔋 Hunger +1";
+        } else {
+            document.getElementById('story-text').innerText = 
+                "You see a berry bush, but you already have a berry in your backpack.";
+        }
+
+        const interactiveArea = document.getElementById('interactive-area');
+        interactiveArea.innerHTML = `
+            <button onclick="visitLake()">Go to Pond 🌊</button>
+            <button onclick="showMainChoices()">Back to Clearing 🔙</button>
+        `;
+    }
+
+    // --- CAVE (Requires Lantern Fish) ---
+    function enterCave() {
+        const hasLanternFish = inventory.includes("Lantern Fish");
+
+        if (hasLanternFish) {
+            document.getElementById('story-text').innerText = 
+                "You step into the dark cave, and your Lantern Fish glows brilliantly in the dark!\n\n" +
+                "Deep inside the cavern, you spot a glowing pedestal with a delicious Birthday Cake 🎂 on top!\n\n" +
+                "🎉 YOU FOUND THE BIRTHDAY CAKE! CONGRATULATIONS, YOU WON THE GAME! 🎉";
+            
             const interactiveArea = document.getElementById('interactive-area');
-            interactiveArea.innerHTML = `<button onclick="goRight()">Continue Right</button>`;
-        }
-
-        function visitLake() {
-            const hasWorm = inventory.includes("Worm");
-            const hasString = inventory.includes("String");
-            const hasStick = inventory.includes("Stick");
-
-            if (hasWorm && hasString && hasStick) {
-                inventory = inventory.filter(item => item !== "Worm" && item !== "String" && item !== "Stick");
-                inventory.push("Fishing Rod");
-                hunger = Math.min(5, hunger + 2);
-                updateUI();
-
-                document.getElementById('story-text').innerText = "You reach a beautiful, quiet lake. You open your backpack and combine your Stick, String, and Worm to craft a Fishing Rod!\n\nYou cast your line and catch a big fish! 🐟\n\n🔋 Hunger +2";
-            } else if (inventory.includes("Fishing Rod")) {
-                hunger = Math.min(5, hunger + 1);
-                updateUI();
-                document.getElementById('story-text').innerText = "You sit at the lake with your Fishing Rod and catch another fresh fish!\n\n🔋 Hunger +1";
-            } else {
-                let missing = [];
-                if (!hasStick) missing.push("Stick");
-                if (!hasString) missing.push("String");
-                if (!hasWorm) missing.push("Worm");
-
-                document.getElementById('story-text').innerText = "You arrive at a clear blue lake. It looks like a great spot to fish, but you still need: " + missing.join(", ") + " to make a fishing rod!";
-            }
-
+            interactiveArea.innerHTML = `
+                <button onclick="location.reload()">Play Again 🔄</button>
+            `;
+        } else {
+            document.getElementById('story-text').innerText = 
+                "You step into the cave, but it is way too dark to see anything! You decide to leave and head back to the clearing.";
+            
             const interactiveArea = document.getElementById('interactive-area');
-            interactiveArea.innerHTML = `<button onclick="goRight()">Continue Right</button>`;
+            interactiveArea.innerHTML = `
+                <button onclick="showMainChoices()">Back to Clearing 🔙</button>
+            `;
         }
-    </script>
+    }
+
+    // --- POND / FISHING LOGIC ---
+    function visitLake() {
+        const hasWorm = inventory.includes("Worm");
+        const hasString = inventory.includes("String");
+        const hasStick = inventory.includes("Stick");
+        const hasBerry = inventory.includes("Berry");
+
+        if (hasWorm && hasString && hasStick && hasBerry) {
+            inventory = inventory.filter(item => item !== "Worm" && item !== "String" && item !== "Stick" && item !== "Berry");
+            inventory.push("Lantern Fish");
+            hunger = Math.min(5, hunger + 3);
+            updateUI();
+
+            document.getElementById('story-text').innerText = 
+                "You reach the pond with your Stick, String, Worm, and a Berry!\n\n" +
+                "You assemble a makeshift rod, bait the hook with the berry and worm, and cast out...\n\n" +
+                "🎣 SPLASH! You caught a rare Lantern Fish! It glows brightly in the dark! 🐟✨";
+
+        } else if (hasWorm && hasString && hasStick) {
+            inventory = inventory.filter(item => item !== "Worm" && item !== "String" && item !== "Stick");
+            inventory.push("Cod Fish");
+            hunger = Math.min(5, hunger + 2);
+            updateUI();
+
+            document.getElementById('story-text').innerText = 
+                "You reach the pond with your Stick, String, and Worm.\n\n" +
+                "You construct a fishing pole and cast your line...\n\n" +
+                "🎣 You caught a fresh Cod Fish! 🐟";
+
+        } else if (inventory.includes("Lantern Fish") || inventory.includes("Cod Fish")) {
+            document.getElementById('story-text').innerText = 
+                "You stand by the quiet pond, but you've already fished here.";
+        } else {
+            let missing = [];
+            if (!hasStick) missing.push("Stick");
+            if (!hasString) missing.push("String (from the Knight)");
+            if (!hasWorm) missing.push("Worm (from an Apple)");
+
+            document.getElementById('story-text').innerText = 
+                "You arrive at the quiet pond. There is nothing to do right now...\n\n" +
+                "You still need: " + missing.join(", ") + " to fish!";
+        }
+
+        const interactiveArea = document.getElementById('interactive-area');
+        interactiveArea.innerHTML = `
+            <button onclick="showMainChoices()">Back to Clearing 🔙</button>
+        `;
+    }
+</script>
+
+</body>
+</html>

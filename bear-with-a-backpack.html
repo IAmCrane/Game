@@ -1,102 +1,85 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bear with a Backpack</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #2e3d29;
-            color: #f0f4f1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-        }
-
-        #game-container {
-            background-color: #1e291b;
-            border: 2px solid #4a6b40;
-            border-radius: 12px;
-            padding: 24px;
-            width: 90%;
-            max-width: 500px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-            text-align: center;
-        }
-
-        #stats-bar {
-            display: flex;
-            justify-content: space-around;
-            background-color: #2e3d29;
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-weight: bold;
-        }
-
-        #story-text {
-            min-height: 100px;
-            margin-bottom: 20px;
-            line-height: 1.5;
-            white-space: pre-line;
-        }
-
-        #interactive-area button {
-            background-color: #4a6b40;
-            color: white;
-            border: none;
-            padding: 10px 16px;
-            margin: 6px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background-color 0.2s;
-        }
-
-        #interactive-area button:hover {
-            background-color: #638c56;
-        }
-
-        #interactive-area input {
-            padding: 8px 12px;
-            border-radius: 4px;
-            border: 1px solid #ccc;
-            font-size: 14px;
-        }
-    </style>
-</head>
-<body>
-
-<div id="game-container">
-    <div id="stats-bar">
-        <div>❤️ Health: <span id="healthDisplay">3</span></div>
-        <div>🔋 Hunger: <span id="hungerDisplay">3</span></div>
-        <div>🎒 Backpack: <span id="inventoryDisplay">Empty</span></div>
-    </div>
-
-    <div id="story-text">You are a bear with a backpack. Welcome to the forest!</div>
-
-    <div id="interactive-area">
-        <button onclick="askName()">Begin Adventure 🐻</button>
-    </div>
-</div>
-
-<script>
-    // --- STATE VARIABLES ---
+// --- STATE VARIABLES ---
     let health = 3;
     let hunger = 3;
     let playerName = "";
     let playerLocation = "";
-    let inventory = [];
+    let inventory = []; // Array of objects: { name: "Apple", count: 1 }
 
+    // --- INVENTORY STACKING HELPERS ---
+    function addItem(name) {
+        const item = inventory.find(i => i.name === name);
+        if (item) {
+            item.count += 1;
+        } else {
+            inventory.push({ name: name, count: 1 });
+        }
+    }
+
+    function removeItem(name) {
+        const itemIndex = inventory.findIndex(i => i.name === name);
+        if (itemIndex !== -1) {
+            inventory[itemIndex].count -= 1;
+            if (inventory[itemIndex].count <= 0) {
+                inventory.splice(itemIndex, 1);
+            }
+        }
+    }
+
+    function getItemCount(name) {
+        const item = inventory.find(i => i.name === name);
+        return item ? item.count : 0;
+    }
+
+    // --- UI UPDATES ---
     function updateUI() {
         document.getElementById('healthDisplay').innerText = health;
         document.getElementById('hungerDisplay').innerText = hunger;
         const invDisplay = document.getElementById('inventoryDisplay');
-        invDisplay.innerText = inventory.length === 0 ? "Empty" : inventory.join(", ");
+        
+        if (inventory.length === 0) {
+            invDisplay.innerHTML = "Empty";
+            return;
+        }
+
+        // Render inventory items as clickable HTML tags/buttons if consumable
+        invDisplay.innerHTML = inventory.map(item => {
+            const label = item.count > 1 ? `${item.count}x ${item.name}` : item.name;
+            if (item.name === "Apple" || item.name === "Cod Fish" || item.name === "Berry") {
+                return `<button onclick="useItem('${item.name}')" style="padding:2px 6px; margin:2px; font-size:12px;">🍎 Eat ${label}</button>`;
+            }
+            return `<span style="margin:2px;">${label}</span>`;
+        }).join(" | ");
+    }
+
+    // --- CONSUMABLE ITEM USE ---
+    function useItem(itemName) {
+        if (itemName === "Apple") {
+            if (getItemCount("Apple") > 0) {
+                removeItem("Apple");
+                health = Math.min(3, health + 1);
+                hunger = Math.min(5, hunger + 1);
+                updateUI();
+                document.getElementById('story-text').innerText = 
+                    "🍎 You ate a crisp, delicious Apple from your backpack!\n\n❤️ Health +1 | 🔋 Hunger +1";
+            }
+        } else if (itemName === "Cod Fish") {
+            if (getItemCount("Cod Fish") > 0) {
+                removeItem("Cod Fish");
+                health = Math.min(3, health + 1);
+                hunger = Math.min(5, hunger + 2);
+                updateUI();
+                document.getElementById('story-text').innerText = 
+                    "🐟 You ate a cooked Cod Fish!\n\n❤️ Health +1 | 🔋 Hunger +2";
+            }
+        } else if (itemName === "Berry") {
+            if (getItemCount("Berry") > 0) {
+                removeItem("Berry");
+                hunger = Math.min(5, hunger + 1);
+                updateUI();
+                document.getElementById('story-text').innerText = 
+                    "🫐 You snacked on a Berry from your backpack!\n\n🔋 Hunger +1";
+            }
+        }
     }
 
     function checkGameOver() {
@@ -182,18 +165,15 @@
         const isGoodApple = Math.random() < 0.5;
 
         if (isGoodApple) {
-            health = Math.min(3, health + 1);
-            hunger = Math.min(5, hunger + 1);
+            addItem("Apple");
             updateUI();
             document.getElementById('story-text').innerText = 
-                "You find a fresh, juicy red apple! You eat it happily.\n\n❤️ Health +1 | 🔋 Hunger +1";
+                "You find a fresh, juicy red Apple! You put it in your backpack for later.";
         } else {
-            if (!inventory.includes("Worm")) {
-                inventory.push("Worm");
-            }
+            addItem("Worm");
             updateUI();
             document.getElementById('story-text').innerText = 
-                "You find an apple, but it's full of wriggling worms! You break off a worm and put it in your backpack.";
+                "You find an apple, but it's full of wriggling worms! You break off a Worm and put it in your backpack.";
         }
 
         const interactiveArea = document.getElementById('interactive-area');
@@ -217,9 +197,7 @@
         const playerWins = Math.random() < 0.5;
 
         if (playerWins) {
-            if (!inventory.includes("String")) {
-                inventory.push("String");
-            }
+            addItem("String");
             updateUI();
             document.getElementById('story-text').innerText = 
                 "ROAR! You let out a mighty growl and defeat the knight! He flees, dropping a piece of String on the ground. You put it in your backpack.";
@@ -295,15 +273,10 @@
     }
 
     function findStick() {
-        if (!inventory.includes("Stick")) {
-            inventory.push("Stick");
-            updateUI();
-            document.getElementById('story-text').innerText = 
-                "You spot a long, sturdy branch lying near the path. You tuck the Stick into your backpack!";
-        } else {
-            document.getElementById('story-text').innerText = 
-                "You see some fallen branches, but you already have a sturdy stick in your backpack.";
-        }
+        addItem("Stick");
+        updateUI();
+        document.getElementById('story-text').innerText = 
+            "You spot a long, sturdy branch lying near the path. You tuck the Stick into your backpack!";
 
         const interactiveArea = document.getElementById('interactive-area');
         interactiveArea.innerHTML = `
@@ -313,16 +286,11 @@
     }
 
     function findBerryBush() {
-        if (!inventory.includes("Berry")) {
-            inventory.push("Berry");
-            hunger = Math.min(5, hunger + 1);
-            updateUI();
-            document.getElementById('story-text').innerText = 
-                "You find a lush berry bush filled with sweet berries! You eat one and put another in your backpack.\n\n🔋 Hunger +1";
-        } else {
-            document.getElementById('story-text').innerText = 
-                "You see a berry bush, but you already have a berry in your backpack.";
-        }
+        addItem("Berry");
+        hunger = Math.min(5, hunger + 1);
+        updateUI();
+        document.getElementById('story-text').innerText = 
+            "You find a lush berry bush filled with sweet berries! You eat one and put another in your backpack.\n\n🔋 Hunger +1";
 
         const interactiveArea = document.getElementById('interactive-area');
         interactiveArea.innerHTML = `
@@ -333,7 +301,7 @@
 
     // --- CAVE ---
     function enterCave() {
-        const hasLanternFish = inventory.includes("Lantern Fish");
+        const hasLanternFish = getItemCount("Lantern Fish") > 0;
 
         if (hasLanternFish) {
             document.getElementById('story-text').innerText = 
@@ -358,14 +326,17 @@
 
     // --- POND / FISHING LOGIC ---
     function visitLake() {
-        const hasWorm = inventory.includes("Worm");
-        const hasString = inventory.includes("String");
-        const hasStick = inventory.includes("Stick");
-        const hasBerry = inventory.includes("Berry");
+        const hasWorm = getItemCount("Worm") > 0;
+        const hasString = getItemCount("String") > 0;
+        const hasStick = getItemCount("Stick") > 0;
+        const hasBerry = getItemCount("Berry") > 0;
 
         if (hasWorm && hasString && hasStick && hasBerry) {
-            inventory = inventory.filter(item => item !== "Worm" && item !== "String" && item !== "Stick" && item !== "Berry");
-            inventory.push("Lantern Fish");
+            removeItem("Worm");
+            removeItem("String");
+            removeItem("Stick");
+            removeItem("Berry");
+            addItem("Lantern Fish");
             hunger = Math.min(5, hunger + 3);
             updateUI();
 
@@ -375,8 +346,10 @@
                 "🎣 SPLASH! You caught a rare Lantern Fish! It glows brightly in the dark! 🐟✨";
 
         } else if (hasWorm && hasString && hasStick) {
-            inventory = inventory.filter(item => item !== "Worm" && item !== "String" && item !== "Stick");
-            inventory.push("Cod Fish");
+            removeItem("Worm");
+            removeItem("String");
+            removeItem("Stick");
+            addItem("Cod Fish");
             hunger = Math.min(5, hunger + 2);
             updateUI();
 
@@ -385,7 +358,7 @@
                 "You construct a fishing pole and cast your line...\n\n" +
                 "🎣 You caught a fresh Cod Fish! 🐟";
 
-        } else if (inventory.includes("Lantern Fish") || inventory.includes("Cod Fish")) {
+        } else if (getItemCount("Lantern Fish") > 0 || getItemCount("Cod Fish") > 0) {
             document.getElementById('story-text').innerText = 
                 "You stand by the quiet pond, but you've already fished here.";
         } else {
@@ -404,7 +377,3 @@
             <button onclick="showMainChoices()">Back to Clearing 🔙</button>
         `;
     }
-</script>
-
-</body>
-</html>
